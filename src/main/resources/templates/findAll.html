@@ -1,0 +1,16 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<table id="userTable">
+    <thead>
+    <tr>
+        <th>로그인 아이디</th>
+        <th>패스워드</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="member : ${members}">
+        <td th:text="${member.loginId}">loginId</td>
+        <td th:text="${member.password}">password</td>
+    </tr>
+    </tbody>
+</table>

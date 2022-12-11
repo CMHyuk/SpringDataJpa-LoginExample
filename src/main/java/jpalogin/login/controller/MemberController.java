@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -175,7 +176,7 @@ public class MemberController {
         return "findPasswordForm";
     }
 
-    @PostMapping("members/findPassword")
+    @PostMapping("/members/findPassword")
     public String findPassword(@Validated @ModelAttribute FindPasswordForm findPasswordForm,
                                BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
@@ -194,5 +195,12 @@ public class MemberController {
         Member member = findMember.get();
         model.addAttribute("password", member.getPassword());
         return "findPassword";
+    }
+
+    @GetMapping("/members/findAllMember")
+    public String findAllMember(Model model) {
+        List members = memberService.findAll();
+        model.addAttribute("members", members);
+        return "findAll";
     }
 }
