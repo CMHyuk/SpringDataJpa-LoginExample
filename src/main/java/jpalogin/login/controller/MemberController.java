@@ -6,6 +6,7 @@ import jpalogin.login.entity.Member;
 import jpalogin.login.form.ChangePasswordForm;
 import jpalogin.login.form.LoginForm;
 import jpalogin.login.form.MemberAddForm;
+import jpalogin.login.form.withdrawalForm;
 import jpalogin.login.service.LoginService;
 import jpalogin.login.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -95,6 +96,11 @@ public class MemberController {
         return "home";
     }
 
+    @GetMapping("/members/editHome")
+    public String editHome() {
+        return "editHome";
+    }
+
     @GetMapping("/members/edit")
     public String editForm(@ModelAttribute ChangePasswordForm changePassword) {
         return "edit";
@@ -114,12 +120,12 @@ public class MemberController {
         log.info("새로운 비밀번호={}", newPassword);
         log.info("새로운 비밀번호 확인={}", checkNewPassword);
 
-        if(!nowPassword.equals(member.getPassword())) {
+        if (!nowPassword.equals(member.getPassword())) {
             bindingResult.reject("checkFail", "현재 비밀번호와 다릅니다.");
             return "edit";
         }
 
-        if(newPassword.equals(member.getPassword())) {
+        if (newPassword.equals(member.getPassword())) {
             bindingResult.reject("sameFail", "현재 비밀번호와 같습니다.");
             return "edit";
         }
@@ -130,10 +136,38 @@ public class MemberController {
         }
 
         memberService.update(member.getId(), newPassword);
-
         HttpSession session = request.getSession(false);
         session.invalidate();
 
         return "redirect:/";
+    }
+
+    @GetMapping("/members/remove")
+    public String remove(@ModelAttribute withdrawalForm withdrawalForm) {
+        return "removeForm";
+    }
+
+    @PostMapping("/members/remove")
+    public String removeMember(@Validated @ModelAttribute withdrawalForm withdrawalForm,
+                               BindingResult bindingResult, @Login Member member,
+                               HttpServletRequest request) {
+
+        String withdrawal = withdrawalForm.getWithdrawal();
+
+        if (bindingResult.hasErrors()) {
+            log.info("error={}", bindingResult);
+            return "removeForm";
+        }
+
+        if (!withdrawal.equals("회원 탈퇴")) {
+            bindingResult.reject("withdrawalFail", "탈퇴를 위하시면 회원 탈퇴를 입력해주세요.");
+            return "removeForm";
+        }
+
+        memberService.delete(member);
+        HttpSession session = request.getSession(false);
+        session.invalidate();
+
+        return "home";
     }
 }
