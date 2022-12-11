@@ -3,15 +3,13 @@ package jpalogin.login.controller;
 import jpalogin.login.argumentresovler.Login;
 import jpalogin.login.argumentresovler.SessionConst;
 import jpalogin.login.entity.Member;
-import jpalogin.login.form.ChangePasswordForm;
-import jpalogin.login.form.LoginForm;
-import jpalogin.login.form.MemberAddForm;
-import jpalogin.login.form.withdrawalForm;
+import jpalogin.login.form.*;
 import jpalogin.login.service.LoginService;
 import jpalogin.login.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -143,12 +142,12 @@ public class MemberController {
     }
 
     @GetMapping("/members/remove")
-    public String remove(@ModelAttribute withdrawalForm withdrawalForm) {
+    public String remove(@ModelAttribute WithdrawalForm withdrawalForm) {
         return "removeForm";
     }
 
     @PostMapping("/members/remove")
-    public String removeMember(@Validated @ModelAttribute withdrawalForm withdrawalForm,
+    public String removeMember(@Validated @ModelAttribute WithdrawalForm withdrawalForm,
                                BindingResult bindingResult, @Login Member member,
                                HttpServletRequest request) {
 
@@ -169,5 +168,31 @@ public class MemberController {
         session.invalidate();
 
         return "home";
+    }
+
+    @GetMapping("/members/findPassword")
+    public String findPasswordForm(@ModelAttribute FindPasswordForm findPasswordForm) {
+        return "findPasswordForm";
+    }
+
+    @PostMapping("members/findPassword")
+    public String findPassword(@Validated @ModelAttribute FindPasswordForm findPasswordForm,
+                               BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            log.info("errors={}", bindingResult);
+            return "findPasswordForm";
+        }
+
+        String loginId = findPasswordForm.getLoginId();
+        Optional<Member> findMember = memberService.findByLoginId(loginId);
+
+        if (findMember.isEmpty()) {
+            bindingResult.reject("findFail", "존재하지않는 아이디입니다.");
+            return "findPasswordForm";
+        }
+
+        Member member = findMember.get();
+        model.addAttribute("password", member.getPassword());
+        return "findPassword";
     }
 }

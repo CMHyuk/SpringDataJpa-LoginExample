@@ -21,8 +21,8 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public Optional<Member> findById(Long id) {
-        return memberRepository.findById(id);
+    public Optional<Member> findByLoginId(String loginId) {
+        return memberRepository.findByLoginId(loginId);
     }
 
     public void update(Long id, String password) {
